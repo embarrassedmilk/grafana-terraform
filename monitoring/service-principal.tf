@@ -28,3 +28,13 @@ resource "azurerm_key_vault_secret" "password" {
   value        = azuread_application_password.grafana.value
   key_vault_id = data.azurerm_key_vault.kv.id
 }
+
+data "azuread_service_principal" "grafana" {
+  application_id = azuread_application.grafana.application_id
+}
+
+resource "azurerm_role_assignment" "grafana_monitoring_reader" {
+  scope                = data.azurerm_resource_group.rg.id
+  role_definition_name = "Monitoring Reader"
+  principal_id         = data.azuread_service_principal.grafana.id
+}

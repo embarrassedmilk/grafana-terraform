@@ -3,6 +3,12 @@ resource "random_password" "password" {
   special = true
 }
 
+resource "azurerm_key_vault_secret" "password" {
+  name         = "db-password"
+  value        = random_password.password.result
+  key_vault_id = azurerm_key_vault.kv.id
+}
+
 resource "azurerm_postgresql_server" "source" {
   name                          = local.postgres_name
   location                      = azurerm_resource_group.rg.location

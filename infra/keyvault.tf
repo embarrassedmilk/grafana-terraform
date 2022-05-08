@@ -17,9 +17,3 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 }
-
-resource "azurerm_key_vault_secret" "password" {
-  name         = "db-password"
-  value        = random_password.password.result
-  key_vault_id = azurerm_key_vault.kv.id
-}
