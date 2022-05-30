@@ -12,7 +12,7 @@ resource "azuread_application" "grafana" {
     dynamic "resource_access" {
       for_each = local.microsoft_graph.scopes
       content {
-        id = resource_access.value
+        id   = resource_access.value
         type = "Scope"
       }
     }
@@ -29,12 +29,13 @@ resource "azurerm_key_vault_secret" "password" {
   key_vault_id = data.azurerm_key_vault.kv.id
 }
 
-data "azuread_service_principal" "grafana" {
+resource "azuread_service_principal" "grafana" {
   application_id = azuread_application.grafana.application_id
+  owners         = [data.azuread_user.owner.id]
 }
 
 resource "azurerm_role_assignment" "grafana_monitoring_reader" {
   scope                = data.azurerm_resource_group.rg.id
   role_definition_name = "Monitoring Reader"
-  principal_id         = data.azuread_service_principal.grafana.id
+  principal_id         = azuread_service_principal.grafana.id
 }

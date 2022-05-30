@@ -1,8 +1,3 @@
-resource "random_password" "grafana_password" {
-  length  = 16
-  special = true
-}
-
 resource "azurerm_service_plan" "grafana" {
   name                = local.app_service_plan_name
   location            = local.location
@@ -26,7 +21,7 @@ resource "azurerm_linux_web_app" "grafana" {
 
   app_settings = {
     "GF_SERVER_ROOT_URL"                          = "https://${local.app_service_name}.azurewebsites.net"
-    "GF_SECURITY_ADMIN_PASSWORD"                  = random_password.grafana_password.result
+    "GF_SECURITY_ADMIN_USER"                      = data.azuread_user.owner.user_principal_name
     "GF_INSTALL_PLUGINS"                          = "grafana-clock-panel,grafana-simple-json-datasource"
     "GF_AUTH_GENERIC_OAUTH_NAME"                  = "Azure AD"
     "GF_AUTH_GENERIC_OAUTH_ENABLED"               = "true"
@@ -61,10 +56,4 @@ resource "azurerm_linux_web_app" "grafana" {
   depends_on = [
     azurerm_storage_share_file.grafana_db
   ]
-}
-
-resource "azurerm_key_vault_secret" "grafana_password" {
-  name         = "grafana-password"
-  value        = random_password.grafana_password.result
-  key_vault_id = data.azurerm_key_vault.kv.id
 }
